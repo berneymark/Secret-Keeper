@@ -1,11 +1,10 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import Camera from './jscomponents/Camera.js/index.js'
 
 function App() {
   return (
     <div className="App">
-      
+      <Camera/>
     </div>
   );
 }
