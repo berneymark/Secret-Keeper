@@ -4,8 +4,8 @@ import Webcam from 'react-webcam';
 class Camera extends React.Component {
     constructor(props) {
         super(props);
-        this.timerId;
-        this.isCapturing;
+        this.timerId = null;
+        this.isCapturing = false;
     }
 
     setRef = webcam => {
@@ -45,3 +45,5 @@ class Camera extends React.Component {
         )
     }
 }
+
+export default Camera;

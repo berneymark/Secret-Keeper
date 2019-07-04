@@ -1,5 +1,5 @@
 import React from 'react';
-import Camera from './jscomponents/Camera.js/index.js'
+import Camera from './jscomponents/Camera.js'
 
 function App() {
   return (
