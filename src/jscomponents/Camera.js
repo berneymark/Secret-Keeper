@@ -25,6 +25,23 @@ class Camera extends React.Component {
         const base64String = image.split(",")[1];
     }
 
+    fetchData = (byteArray) => {
+        const apiKey = "5fc2fa40176b44e199807bc0a14b7478";
+        const apiEndpoint = "https://australiaeast.api.cognitive.microsoft.com/face/v1.0/detect?returnFaceId";
+
+        fetch(apiEndpoint, {
+            body: byteArray,
+            headers: {'cache-control': 'no-cache', 'Ocp-Apim-Subscription-Key': apiKey, 'Content-Type': 'application/json'},
+            method: 'POST'
+        }).then(response => {
+            if (response.ok) {
+                response.json().then(data => {
+                    var matchedFace = null;
+                })
+            }
+        })
+    }
+
     render() {
         const videoConstraints = {
             width: 750,
