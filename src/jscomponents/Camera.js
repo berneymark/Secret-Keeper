@@ -1,5 +1,6 @@
 import React from 'react';
 import Webcam from 'react-webcam';
+import SecurityCheck from './SecurityCheck';
 
 class Camera extends React.Component {
     constructor(props) {
@@ -17,12 +18,15 @@ class Camera extends React.Component {
         this.timerId.setInterval(() => {
             const image = this.webcam.getScreenshot();
             const byteArrayImage = this.convertToByteArray(image);
+            this.fetchData(byteArrayImage);
         }, 1000);
     }
 
     convertToByteArray = (image) => {
         const base64 = require("base64-js");
-        const base64String = image.split(",")[1];
+        const base64string = image.split(",")[1];
+
+        return base64.toByteArray(base64string);
     }
 
     fetchData = (byteArray) => {
@@ -31,7 +35,11 @@ class Camera extends React.Component {
 
         fetch(apiEndpoint, {
             body: byteArray,
-            headers: {'cache-control': 'no-cache', 'Ocp-Apim-Subscription-Key': apiKey, 'Content-Type': 'application/json'},
+            headers: {
+                'cache-control': 'no-cache', 
+                'Ocp-Apim-Subscription-Key': apiKey, 
+                'Content-Type': 'application/json'
+            },
             method: 'POST'
         }).then(response => {
             if (response.ok) {
@@ -40,6 +48,15 @@ class Camera extends React.Component {
                 })
             }
         })
+    }
+
+    saveImage = () => {
+        var sourceImg = this.webcam.getScreenshot;
+        var imageTag = document.getElementById("ownerFace");
+
+        imageTag.src = sourceImg;
+
+        return sourceImg; 
     }
 
     render() {
@@ -58,6 +75,8 @@ class Camera extends React.Component {
                     width = {375}
                     screenshotFormat = "image/jpeg"
                     videoConstraints = {videoConstraints}/>
+                <button onClick={this.saveImage}>Add User</button>
+                <img id="ownerFace"/>
             </div>
         )
     }
