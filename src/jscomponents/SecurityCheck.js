@@ -3,24 +3,20 @@ import React from 'react';
 class SecurityCheck extends React.Component {
     constructor(props) {
         super(props);
+
+        this._isMounted = false;
+
         const ownerImageURL = "https://miro.medium.com/fit/c/256/256/1*DtfGQ_Lcz9ZJQyADo3vvgA.jpeg";
         const apiKey = "451f682a4583442fa9613d22c57b502d";
         const apiEndpoint = "https://facelock.cognitiveservices.azure.com/face/v1.0/";
 
-        this.state = {
-            userFaceId: null,
-            cameraFaceId: null
-        };
-
-        this.retrieveFaceId(ownerImageURL, apiKey, apiEndpoint);
-
-        console.log(this.state.userFaceId);
-        console.log(this.state.cameraFaceId);
+        this.retrieveUserFaceId(ownerImageURL, this.props.faceId, apiKey, apiEndpoint);
     }
 
-    retrieveFaceId = (imageUrl, apiKey, apiEndpoint) => {
+    retrieveUserFaceId = (userImageUrl, cameraByteArray, apiKey, apiEndpoint) => {
         fetch(apiEndpoint + "detect", {
-            body: '{"url": ' + '"' + imageUrl + '"}',
+            // eslint-disable-next-line
+            body: '{"url": ' + '"' + userImageUrl + '"}',
             headers: {
                 'cache-control': 'no-cache', 
                 'Ocp-Apim-Subscription-Key': apiKey, 
@@ -28,24 +24,40 @@ class SecurityCheck extends React.Component {
             },
             method: 'POST'
         }).then(response => {
-            if (response.ok) {
-                response.json().then(data => {
-                    this.setState({
-                        userFaceId: data[0].faceId
-                    });
-                })
-            }
+            if (response.ok)
+                return response.json();
+        }).then(data => {
+            console.log("Changing state of userFaceId to: " + data[0].faceId);
+
+            this.retrieveCameraFaceId(data[0].faceId, cameraByteArray, apiKey, apiEndpoint);
+        })
+    }
+
+    retrieveCameraFaceId = (userFaceId, cameraByteArray, apiKey, apiEndpoint) => {
+        fetch(apiEndpoint + "detect", {
+            body: cameraByteArray,
+            headers: {
+                'cache-control': 'no-cache', 
+                'Ocp-Apim-Subscription-Key': apiKey, 
+                'Content-Type': 'application/octet-stream'
+            },
+            method: 'POST'
+        }).then(response => {
+            if (response.ok)
+                return response.json();
+        }).then(data => {
+            if (typeof data[0] != 'undefined') {
+                console.log("Changing state of cameraFaceId to: " + data[0].faceId);
+                this.compareFaceId(userFaceId, data[0].faceId, apiKey, apiEndpoint);
+            } else alert("No face found.");
         })
     }
 
     compareFaceId = (userFaceId, cameraFaceId, apiKey, apiEndpoint) => {
-        var input = {
-            faceId1: userFaceId,
-            faceId2: cameraFaceId
-        }
+        var input = JSON.stringify({"faceId1": userFaceId, "faceId2": cameraFaceId});
 
         fetch(apiEndpoint + "verify", {
-            body: JSON.stringify(input),
+            body: input,
             headers: {
                 'cache-control': 'no-cache', 
                 'Ocp-Apim-Subscription-Key': apiKey, 
@@ -54,17 +66,22 @@ class SecurityCheck extends React.Component {
             method: 'POST'
         }).then(response => {
             if (response.ok) {
-                response.json().then(data => {
-                    console.log("Face match successful...");
-                })
+                return response.json(); 
             }
+        }).then(data => {
+            if (typeof data != 'undefined') {
+                console.log("Faces are identical: " + data.isIdentical);
+                if (data.isIdentical)
+                    alert("The secret is that you're Batman!")
+                else alert("You are not Bruce. You can't know the secret.");
+            } else alert("Face match is undefined.");
         })
     }
 
     render() {
-        return <div>
-            <p>{}</p>
-        </div>
+        return(
+            <div></div>
+        )
     }
 }
 

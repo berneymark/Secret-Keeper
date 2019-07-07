@@ -5,11 +5,10 @@ import SecurityCheck from './SecurityCheck.js';
 class Camera extends React.Component {
     constructor(props) {
         super(props);
-        this.isCapturing = false;
-
         this.state = {
-            cameraFaceId: null
-        };
+            cameraByteArray: null,
+            passOn: false
+        }
     }
 
     setRef = webcam => {
@@ -17,11 +16,14 @@ class Camera extends React.Component {
     }
 
     checkUser = () => {
-        this.isCapturing = true;
         const image = this.webcam.getScreenshot();
         const byteArrayImage = this.convertToByteArray(image);
+        this.setState({
+            cameraByteArray: byteArrayImage,
+            passOn: true
+        });
 
-        return this.fetchData(byteArrayImage);
+        return byteArrayImage;
     }
 
     convertToByteArray = (image) => {
@@ -31,32 +33,12 @@ class Camera extends React.Component {
         return base64.toByteArray(base64string);
     }
 
-    fetchData = (byteArray) => {
-        const apiKey = "451f682a4583442fa9613d22c57b502d";
-        const apiEndpoint = "https://facelock.cognitiveservices.azure.com/face/v1.0/detect";
-
-        fetch(apiEndpoint, {
-            body: byteArray,
-            headers: {
-                'cache-control': 'no-cache', 
-                'Ocp-Apim-Subscription-Key': apiKey, 
-                'Content-Type': 'application/octet-stream'
-            },
-            method: 'POST'
-        }).then(response => {
-            if (response.ok) {
-                response.json().then(data => {
-                    if (data[0] != null) {
-                        console.log(data[0].faceId);
-                        this.setState = {
-                            cameraFaceId: data[0].faceId
-                        };
-
-                        return data[0].faceId;
-                    } else console.log("it's null this time round...");
-                })
-            }
+    returnSecurityCheck = () => {
+        this.setState({
+            passOn: false
         })
+
+        return (<SecurityCheck faceId = {this.state.cameraByteArray}/>)
     }
 
     render() {
@@ -77,8 +59,15 @@ class Camera extends React.Component {
                         screenshotFormat = "image/jpeg"
                         videoConstraints = {videoConstraints}/>
                 </div>
-                <SecurityCheck faceId = {this.state.cameraFaceId}/>
-                <button variant="primary" onClick={this.checkUser}>Login</button>
+                <button 
+                    id = "loginButton" 
+                    variant = "primary" 
+                    onClick = {this.checkUser}>
+                    Login
+                </button>
+                <div>
+                    {this.state.passOn ? <this.returnSecurityCheck/> : null}
+                </div>
             </div>
         )
     }
