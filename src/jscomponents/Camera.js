@@ -1,25 +1,27 @@
 import React from 'react';
 import Webcam from 'react-webcam';
-import SecurityCheck from './SecurityCheck';
+import SecurityCheck from './SecurityCheck.js';
 
 class Camera extends React.Component {
     constructor(props) {
         super(props);
-        this.timerId = null;
         this.isCapturing = false;
+
+        this.state = {
+            cameraFaceId: null
+        };
     }
 
     setRef = webcam => {
         this.webcam = webcam;
     }
 
-    startCapturing = () => {
+    checkUser = () => {
         this.isCapturing = true;
-        this.timerId.setInterval(() => {
-            const image = this.webcam.getScreenshot();
-            const byteArrayImage = this.convertToByteArray(image);
-            this.fetchData(byteArrayImage);
-        }, 1000);
+        const image = this.webcam.getScreenshot();
+        const byteArrayImage = this.convertToByteArray(image);
+
+        return this.fetchData(byteArrayImage);
     }
 
     convertToByteArray = (image) => {
@@ -30,33 +32,31 @@ class Camera extends React.Component {
     }
 
     fetchData = (byteArray) => {
-        const apiKey = "5fc2fa40176b44e199807bc0a14b7478";
-        const apiEndpoint = "https://australiaeast.api.cognitive.microsoft.com/face/v1.0/detect?returnFaceId";
+        const apiKey = "451f682a4583442fa9613d22c57b502d";
+        const apiEndpoint = "https://facelock.cognitiveservices.azure.com/face/v1.0/detect";
 
         fetch(apiEndpoint, {
             body: byteArray,
             headers: {
                 'cache-control': 'no-cache', 
                 'Ocp-Apim-Subscription-Key': apiKey, 
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/octet-stream'
             },
             method: 'POST'
         }).then(response => {
             if (response.ok) {
                 response.json().then(data => {
-                    var matchedFace = null;
+                    if (data[0] != null) {
+                        console.log(data[0].faceId);
+                        this.setState = {
+                            cameraFaceId: data[0].faceId
+                        };
+
+                        return data[0].faceId;
+                    } else console.log("it's null this time round...");
                 })
             }
         })
-    }
-
-    saveImage = () => {
-        var sourceImg = this.webcam.getScreenshot;
-        var imageTag = document.getElementById("ownerFace");
-
-        imageTag.src = sourceImg;
-
-        return sourceImg; 
     }
 
     render() {
@@ -68,15 +68,17 @@ class Camera extends React.Component {
 
         return(
             <div>
-                <Webcam
-                    ref = {this.setRef}
-                    audio = {false}
-                    height = {250}
-                    width = {375}
-                    screenshotFormat = "image/jpeg"
-                    videoConstraints = {videoConstraints}/>
-                <button onClick={this.saveImage}>Add User</button>
-                <img id="ownerFace"/>
+                <div>
+                    <Webcam
+                        ref = {this.setRef}
+                        audio = {false}
+                        height = {250}
+                        width = {375}
+                        screenshotFormat = "image/jpeg"
+                        videoConstraints = {videoConstraints}/>
+                </div>
+                <SecurityCheck faceId = {this.state.cameraFaceId}/>
+                <button variant="primary" onClick={this.checkUser}>Login</button>
             </div>
         )
     }
