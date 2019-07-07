@@ -1,6 +1,7 @@
 import React from 'react';
 import Webcam from 'react-webcam';
 import SecurityCheck from './SecurityCheck.js';
+import '../css/camera.css';
 
 class Camera extends React.Component {
     constructor(props) {
@@ -50,7 +51,7 @@ class Camera extends React.Component {
 
         return(
             <div>
-                <div>
+                <div class = "webcamDiv">
                     <Webcam
                         ref = {this.setRef}
                         audio = {false}
@@ -60,10 +61,10 @@ class Camera extends React.Component {
                         videoConstraints = {videoConstraints}/>
                 </div>
                 <button 
-                    id = "loginButton" 
+                    class = "loginButton" 
                     variant = "primary" 
                     onClick = {this.checkUser}>
-                    Login
+                    Find Secret
                 </button>
                 <div>
                     {this.state.passOn ? <this.returnSecurityCheck/> : null}
