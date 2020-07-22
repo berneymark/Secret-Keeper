@@ -7,7 +7,7 @@ class SecurityCheck extends React.Component {
         this._isMounted = false;
 
         const ownerImageURL = "https://miro.medium.com/fit/c/256/256/1*DtfGQ_Lcz9ZJQyADo3vvgA.jpeg";
-        const apiKey = "451f682a4583442fa9613d22c57b502d";
+        const apiKey = "INACTIVE";
         const apiEndpoint = "https://facelock.cognitiveservices.azure.com/face/v1.0/";
 
         this.retrieveUserFaceId(ownerImageURL, this.props.faceId, apiKey, apiEndpoint);
